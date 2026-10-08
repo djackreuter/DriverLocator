@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace DriverLocator
 {
@@ -11,14 +12,59 @@ namespace DriverLocator
     {
         static void Main(string[] args)
         {
-            String[] drivers = Directory.GetFiles(@"C:\Windows\System32\Drivers");
+            String[] sysFilePaths = { @"C:\Windows\System32\Drivers", @"C:\Windows" };
+            String[] appFilePaths = { @"C:\Program Files", @"C:\Program Files (x86)" };
 
-            for (int i = 0; i < drivers.Length - 1; i++)
+            String[] sysDrivers = { };
+            String[] appDrivers = { };
+
+            String[] vendors = {
+                "Microsoft",
+                "Broadcom",
+                "Realtek",
+                "VMware",
+                "Avago",
+                "NVIDIA", 
+                "Mellanox",
+                "Marvell",
+                "LSI",
+                "Intel",
+                "PMC",
+                "AMD",
+                "Advanced Micro Devices",
+                "Apple",
+                "Windows",
+                "Qlogic",
+                "Promise",
+                "Silicon",
+                "Microsemi",
+                "VIA"
+            };
+
+            foreach (string file in sysFilePaths)
             {
-                if (drivers[i] == null)
-                    continue;
+                try
+                {
+                    sysDrivers = sysDrivers.Concat(Directory.GetFiles(file, "*.sys", SearchOption.TopDirectoryOnly)).ToArray();
+                }
+                catch (UnauthorizedAccessException) { continue; }
+            }
 
-                FileVersionInfo fileInfo = FileVersionInfo.GetVersionInfo(drivers[i]);
+            foreach (string file in appFilePaths)
+            {
+                try
+                {
+                    appDrivers = appDrivers.Concat(Directory.GetFiles(file, "*.sys", SearchOption.AllDirectories)).ToArray();
+                }
+                catch (UnauthorizedAccessException) { continue; }
+            }
+
+            var drivers = sysDrivers.Concat(appDrivers).ToArray();
+
+            foreach (string driver in drivers)
+            {
+
+                FileVersionInfo fileInfo = FileVersionInfo.GetVersionInfo(driver);
                 String fileName = fileInfo.FileName;
                 String companyName = fileInfo.CompanyName != null ? fileInfo.CompanyName : "";
                 String fileDescription = fileInfo.FileDescription;
@@ -27,11 +73,20 @@ namespace DriverLocator
                 if (companyName.Contains("Microsoft"))
                     continue;
 
-                Console.WriteLine("====================");
+                bool isVendor = vendors.Any(word => 
+                    companyName.IndexOf(word, StringComparison.OrdinalIgnoreCase) >= 0); 
+
+                if (!isVendor)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+
+                Console.WriteLine("\n============================================================================");
                 Console.WriteLine($"{companyName}");
                 Console.WriteLine($"{fileName}");
                 Console.WriteLine($"{fileDescription}");
                 Console.WriteLine($"{fileVersion} - {copyright}");
+                Console.ResetColor();
             }
         }
     }
