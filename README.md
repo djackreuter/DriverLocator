@@ -1,6 +1,16 @@
 # DriverLocator
 
 
-Easily locate non-Microsoft drivers in the `C:\Windows\System32\drivers` directory.
+Easily locate non-Microsoft drivers.
 
-<img width="516" height="494" alt="image" src="https://github.com/user-attachments/assets/18aef740-e95d-4dc8-8282-416393974898" />
+Checks the following locations:<br>
+`C:\Windows\`<br>
+`C:\Windows\System32\drivers\`
+
+Recursively checks:<br>
+`C:\Program Files\`<br>
+`C:\Program Files (x86)\`
+
+Drivers that are not from common vendors are highlighted green.
+
+<img width="731" height="577" alt="image" src="https://github.com/user-attachments/assets/5b8f8816-3a5e-4077-b6ff-fccac536f896" />
